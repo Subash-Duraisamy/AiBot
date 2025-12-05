@@ -1,0 +1,279 @@
+/* ==============================
+   GLOBAL FULLSCREEN FIX
+================================*/
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Prevents page scrolling */
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ==============================
+   NEON MOVING BACKGROUND
+================================*/
+.chat-wrapper {
+  position: fixed;
+  inset: 0; /* Fullscreen */
+  background: linear-gradient(135deg, #1e00ff, #ff006a, #7a00ff);
+  background-size: 220% 220%;
+  animation: bgMove 7s ease infinite;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ==============================
+   CHAT BOX (GLASS EFFECT)
+================================*/
+.chat-container {
+  width: min(95%, 480px);
+  height: 100%;
+  max-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(22px);
+  border-radius: 0; /* Fullscreen mobile look */
+  border: 1px solid rgba(255,255,255,0.25);
+
+  box-shadow:
+    0 0 30px rgba(255,0,180,0.45),
+    0 0 40px rgba(0,200,255,0.35);
+}
+
+/* ==============================
+   HEADER
+================================*/
+.chat-header {
+  padding: 20px;
+  text-align: center;
+  color: white;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.chat-header p {
+  margin: 5px 0 0;
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+/* ==============================
+   CHAT AREA (SCROLLABLE)
+================================*/
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scroll-behavior: smooth;
+}
+
+/* CUSTOM SCROLLBAR */
+.chat-body::-webkit-scrollbar { width: 8px; }
+.chat-body::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+}
+.chat-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00eaff, #ff00d4);
+  border-radius: 10px;
+  box-shadow: 0 0 10px #ff00c8;
+}
+
+/* ==============================
+   MESSAGES
+================================*/
+.msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.msg-you { flex-direction: row-reverse; }
+
+/* Avatar */
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+
+/* Bubbles */
+.bubble {
+  max-width: 70%;
+  padding: 14px 18px;
+  border-radius: 20px;
+  white-space: pre-line;
+  font-size: 15px;
+  line-height: 1.45;
+
+  animation: bubblePop 0.25s ease-out;
+}
+
+@keyframes bubblePop {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Bot bubble */
+.bot {
+  background: rgba(0,150,255,0.35);
+  border: 1px solid rgba(0,200,255,0.7);
+}
+
+/* User bubble */
+.you {
+  background: rgba(255,0,150,0.35);
+  border: 1px solid rgba(255,80,200,0.7);
+}
+
+/* Double tick */
+.tick {
+  display: block;
+  text-align: right;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #7fd9ff;
+}
+
+/* ==============================
+   INPUT BAR
+================================*/
+.chat-input-area {
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  background: rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255,255,255,0.25);
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 30px;
+  background: rgba(255,255,255,0.2);
+  outline: none;
+  color: white;
+  font-size: 15px;
+}
+
+.send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: white;
+
+  background: linear-gradient(135deg, #00ffe7, #008cff);
+  box-shadow: 0 4px 12px rgba(0,255,255,0.4);
+  transition: 0.2s;
+}
+
+.send-btn:hover { transform: scale(1.07); }
+
+/* ==============================
+   CELEBRATION (CONFETTI + EMOJIS)
+================================*/
+.confetti-piece {
+  position: fixed;
+  top: -10px;
+  width: 10px;
+  height: 18px;
+  border-radius: 3px;
+  opacity: 0.9;
+  animation: fallConfetti 1.2s linear forwards;
+}
+
+@keyframes fallConfetti {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(120vh) rotate(360deg); }
+}
+
+.emoji-burst {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 45px;
+  animation: burstUp 1.2s ease-out forwards;
+}
+
+@keyframes burstUp {
+  0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -160px) scale(0.3); }
+}
+
+/* ==============================
+   SAD ANIMATIONS
+================================*/
+.sad-shake {
+  animation: sadShake 0.4s ease;
+}
+
+@keyframes sadShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  50% { transform: translateX(7px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.sad-dim {
+  animation: sadDimEffect 1s ease;
+}
+
+@keyframes sadDimEffect {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(0.5); }
+  100% { filter: brightness(1); }
+}
+
+/* Blue raindrops */
+.sad-drop {
+  position: fixed;
+  top: -20px;
+  width: 6px;
+  height: 18px;
+  background: rgba(0,150,255,0.7);
+  border-radius: 3px;
+  animation: sadRain linear forwards;
+}
+
+@keyframes sadRain {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(120vh); }
+}
+
+/* ==============================
+   RESPONSIVE (Mobile Perfect Fit)
+================================*/
+@media (max-width: 600px) {
+  .chat-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
