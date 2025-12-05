@@ -21,7 +21,7 @@ export default function Chat() {
   const [_user, setUser] = useState(auth.currentUser);
 
   const BOT_IMG = "/aibot.png";
-  const USER_IMG = "/user.jpg";
+  const USER_IMG = "/user1.png";
 
   function cleanText(text) {
     return text.replace(/\*\*/g, "").replace(/\*/g, "");
@@ -191,35 +191,46 @@ User: ${textToSend}
 
   return (
     <div className="chat-wrapper">
-      <div className="chat-container" ref={chatContainerRef}>
-
+      <div className="chat-container" ref={chatContainerRef} role="region" aria-label="Chat container">
         <div className="chat-header">
-          <h2>🔥 Subash's AI Buddy</h2>
-          <p>Your friendly chat partner</p>
+          <h2>FiG</h2>
+          <p>just us U & Me</p>
         </div>
 
-        <div className="chat-body">
+        <div
+          className="chat-body"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+        >
           {messages.map((msg, i) => (
             <div
               key={i}
               className={`msg-row ${msg.sender === "you" ? "msg-you" : "msg-bot"}`}
             >
-              <img className="avatar" src={msg.avatar} alt="" />
+              <img
+                className="avatar"
+                src={msg.avatar}
+                alt={msg.sender === "you" ? "Your avatar" : "Bot avatar"}
+                loading="lazy"
+                width="42"
+                height="42"
+              />
 
               <div className={`bubble ${msg.sender}`}>
                 {msg.text}
-                {msg.sender === "you" && <span className="tick">✔✔</span>}
+                {msg.sender === "you" && <span className="tick" aria-hidden>✔✔</span>}
               </div>
             </div>
           ))}
 
-          <div ref={bottomRef}></div>
+          <div ref={bottomRef} />
         </div>
 
         <div className="chat-input-area">
           <input
             className="chat-input"
-            placeholder="Talk to your AI buddy…"
+            placeholder="Talk to your FiG Buddy…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -227,11 +238,20 @@ User: ${textToSend}
                 sendMessage();
               }
             }}
+            aria-label="Type your message"
+            inputMode="text"
+            autoComplete="off"
           />
 
-          <button className="send-btn" onClick={sendMessage}>➤</button>
+          <button
+            className="send-btn"
+            onClick={sendMessage}
+            aria-label="Send message"
+            title="Send"
+          >
+            ➤
+          </button>
         </div>
-
       </div>
     </div>
   );

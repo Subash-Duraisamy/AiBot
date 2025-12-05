@@ -1,3 +1,7 @@
+export const config = {
+  schedule: "@daily",        // runs once a day
+};
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -14,16 +18,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// IMPORTANT: Netlify injects GEMINI_API_KEY here
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const handler = async () => {
-  const userId = "vte0Vy61V7UMrPVv3XXMD7YeEZ43"; 
+  const userId = "vte0Vy61V7UMrPVv3XXMD7YeEZ43";
   const today = new Date().toISOString().split("T")[0];
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-  });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `
     You are Subash's motivational AI.

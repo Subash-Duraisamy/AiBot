@@ -1,279 +1,328 @@
-/* ==============================
-   GLOBAL FULLSCREEN FIX
-================================*/
+/* ========== GLOBAL / LAYOUT ========== */
+:root{
+  --bg1: #1e00ff;
+  --bg2: #ff006a;
+  --bg3: #7a00ff;
+  --glass: rgba(255,255,255,0.12);
+  --glass-strong: rgba(255,255,255,0.18);
+  --bot-bg: rgba(0,150,255,0.35);
+  --you-bg: rgba(255,0,150,0.35);
+  --accent1: #00eaff;
+  --accent2: #ff00d4;
+}
+
+/* Fullscreen safe area and remove page scrolling */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* Prevents page scrolling */
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+  background: #000; /* fallback while bg loads */
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
 }
 
-/* ==============================
-   NEON MOVING BACKGROUND
-================================*/
+/* Wrapper covers entire viewport but centers container responsively */
 .chat-wrapper {
   position: fixed;
-  inset: 0; /* Fullscreen */
-  background: linear-gradient(135deg, #1e00ff, #ff006a, #7a00ff);
-  background-size: 220% 220%;
-  animation: bgMove 7s ease infinite;
-
+  inset: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+  background-size: 220% 220%;
+  animation: bgMove 8s ease infinite;
+  -webkit-animation: bgMove 8s ease infinite;
 }
 
+/* Background animation */
 @keyframes bgMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* ==============================
-   CHAT BOX (GLASS EFFECT)
-================================*/
-.chat-container {
-  width: min(95%, 480px);
-  height: 100%;
-  max-height: 100vh;
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .chat-wrapper { animation: none; }
+}
 
+/* ========== CHAT BOX ========== */
+/* On large screens we keep a centered card, on small devices it becomes full-screen */
+.chat-container {
+  width: min(95%, 960px);         /* allow more width on desktop */
+  max-width: 960px;
+  height: min(92vh, 900px);
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 8px 30px rgba(0,0,0,0.45),
+    0 0 30px rgba(255,0,180,0.12),
+    0 0 40px rgba(0,200,255,0.06);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(22px);
-  border-radius: 0; /* Fullscreen mobile look */
-  border: 1px solid rgba(255,255,255,0.25);
-
-  box-shadow:
-    0 0 30px rgba(255,0,180,0.45),
-    0 0 40px rgba(0,200,255,0.35);
 }
 
-/* ==============================
-   HEADER
-================================*/
+/* For very narrow screens (phones) use full screen look */
+@media (max-width: 640px) {
+  .chat-container {
+    width: 100%;
+    height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+/* ========== HEADER ========== */
 .chat-header {
-  padding: 20px;
+  padding: 18px 20px;
   text-align: center;
   color: white;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
 }
 
 .chat-header h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: clamp(18px, 2.2vw, 26px);
+  line-height: 1;
 }
 
 .chat-header p {
-  margin: 5px 0 0;
-  opacity: 0.8;
-  font-size: 13px;
+  margin: 6px 0 0;
+  font-size: 12px;
+  opacity: 0.85;
 }
 
-/* ==============================
-   CHAT AREA (SCROLLABLE)
-================================*/
+/* ========== CHAT BODY ========== */
 .chat-body {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* CUSTOM SCROLLBAR */
-.chat-body::-webkit-scrollbar { width: 8px; }
+/* Improved scrollbar that is subtle and works well across browsers */
+.chat-body::-webkit-scrollbar { width: 10px; height: 10px; }
 .chat-body::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.08);
-  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 999px;
 }
 .chat-body::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #00eaff, #ff00d4);
-  border-radius: 10px;
-  box-shadow: 0 0 10px #ff00c8;
+  background: linear-gradient(180deg, var(--accent1), var(--accent2));
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.35);
 }
 
-/* ==============================
-   MESSAGES
-================================*/
+/* ========== MESSAGE ROWS ========== */
 .msg-row {
   display: flex;
   align-items: flex-end;
   gap: 12px;
+  width: 100%;
 }
 
+/* Reverse row for user's messages */
 .msg-you { flex-direction: row-reverse; }
 
 /* Avatar */
 .avatar {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.4);
+  border: 2px solid rgba(255,255,255,0.35);
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-/* Bubbles */
+/* Bubble base */
 .bubble {
-  max-width: 70%;
-  padding: 14px 18px;
-  border-radius: 20px;
+  max-width: 78%;
+  padding: 12px 16px;
+  border-radius: 18px;
   white-space: pre-line;
   font-size: 15px;
   line-height: 1.45;
-
-  animation: bubblePop 0.25s ease-out;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.02);
+  word-break: break-word;
+  word-wrap: break-word;
+  animation: bubblePop 240ms ease-out;
 }
 
+/* small screens: make bubbles more comfortable */
+@media (max-width: 420px) {
+  .bubble { font-size: 14px; padding: 12px; }
+  .avatar { width: 40px; height: 40px; min-width: 40px; }
+}
+
+/* pop animation */
 @keyframes bubblePop {
-  from { transform: scale(0.85); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from { transform: translateY(6px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-/* Bot bubble */
+/* bot bubble */
 .bot {
-  background: rgba(0,150,255,0.35);
-  border: 1px solid rgba(0,200,255,0.7);
+  background: var(--bot-bg);
+  border: 1px solid rgba(0,200,255,0.6);
+  color: #f8feff;
 }
 
-/* User bubble */
+/* user bubble */
 .you {
-  background: rgba(255,0,150,0.35);
+  background: var(--you-bg);
   border: 1px solid rgba(255,80,200,0.7);
+  color: #fffdfd;
 }
 
-/* Double tick */
+/* tick shown for user's messages */
 .tick {
   display: block;
   text-align: right;
-  margin-top: 5px;
+  margin-top: 6px;
   font-size: 12px;
-  color: #7fd9ff;
+  color: rgba(127,217,255,0.95);
 }
 
-/* ==============================
-   INPUT BAR
-================================*/
+/* ========== INPUT AREA ========== */
 .chat-input-area {
-  padding: 14px;
+  padding: 12px;
   display: flex;
   gap: 12px;
-  background: rgba(255,255,255,0.15);
-  border-top: 1px solid rgba(255,255,255,0.25);
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 
+/* input */
 .chat-input {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 12px 16px;
   border: none;
-  border-radius: 30px;
-  background: rgba(255,255,255,0.2);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
   outline: none;
   color: white;
   font-size: 15px;
+  min-height: 44px;
+  caret-color: var(--accent1);
 }
 
+/* placeholder color */
+.chat-input::placeholder { color: rgba(255,255,255,0.7); }
+
+/* send button */
 .send-btn {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: none;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
   color: white;
-
-  background: linear-gradient(135deg, #00ffe7, #008cff);
-  box-shadow: 0 4px 12px rgba(0,255,255,0.4);
-  transition: 0.2s;
+  background: linear-gradient(135deg, var(--accent1), #008cff);
+  box-shadow: 0 6px 18px rgba(0,255,255,0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
-.send-btn:hover { transform: scale(1.07); }
+.send-btn:hover { transform: translateY(-3px); }
+.send-btn:active { transform: translateY(-1px) scale(0.99); }
 
-/* ==============================
-   CELEBRATION (CONFETTI + EMOJIS)
-================================*/
+/* make sure focus outlines are visible for keyboard users */
+.chat-input:focus, .send-btn:focus {
+  outline: 3px solid rgba(0,200,255,0.14);
+  outline-offset: 2px;
+}
+
+/* ========== CELEBRATION & SAD EFFECTS ========== */
+/* confetti */
 .confetti-piece {
   position: fixed;
   top: -10px;
   width: 10px;
   height: 18px;
   border-radius: 3px;
-  opacity: 0.9;
+  opacity: 0.95;
+  z-index: 9999;
   animation: fallConfetti 1.2s linear forwards;
+  pointer-events: none;
 }
 
 @keyframes fallConfetti {
   0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(120vh) rotate(360deg); }
+  100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
 }
 
+/* emoji burst */
 .emoji-burst {
   position: fixed;
-  top: 40%;
+  top: 45%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 45px;
+  font-size: 48px;
+  z-index: 10000;
   animation: burstUp 1.2s ease-out forwards;
+  pointer-events: none;
 }
 
 @keyframes burstUp {
   0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -160px) scale(0.3); }
+  100% { opacity: 0; transform: translate(-50%, -160px) scale(0.28); }
 }
 
-/* ==============================
-   SAD ANIMATIONS
-================================*/
-.sad-shake {
-  animation: sadShake 0.4s ease;
-}
-
+/* sad shake & drops */
+.sad-shake { animation: sadShake 0.45s ease; }
 @keyframes sadShake {
   0% { transform: translateX(0); }
-  25% { transform: translateX(-7px); }
-  50% { transform: translateX(7px); }
-  75% { transform: translateX(-5px); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-6px); }
   100% { transform: translateX(0); }
 }
 
-.sad-dim {
-  animation: sadDimEffect 1s ease;
-}
-
-@keyframes sadDimEffect {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(0.5); }
-  100% { filter: brightness(1); }
-}
-
-/* Blue raindrops */
 .sad-drop {
   position: fixed;
-  top: -20px;
+  top: -24px;
   width: 6px;
   height: 18px;
-  background: rgba(0,150,255,0.7);
+  background: rgba(0,150,255,0.78);
   border-radius: 3px;
+  z-index: 9999;
   animation: sadRain linear forwards;
+  pointer-events: none;
 }
-
 @keyframes sadRain {
   0% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(120vh); }
 }
 
-/* ==============================
-   RESPONSIVE (Mobile Perfect Fit)
-================================*/
-@media (max-width: 600px) {
-  .chat-container {
-    width: 100%;
-    height: 100vh;
-    border-radius: 0;
-    box-shadow: none;
-  }
+/* ========== SMALL UTILS ========== */
+.no-select { user-select: none; -webkit-user-select: none; }
+
+@media (max-width: 900px) {
+  .chat-container { width: min(95%, 720px); max-width: 720px; }
 }
+
+@media (min-width: 1000px) {
+  .chat-wrapper { padding: 40px; }
+}
+
+/* end of file */
