@@ -2,6 +2,7 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { createUserProfile } from "../utils/createUserProfile";
 import { useNavigate } from "react-router-dom";
+import "../styles/login.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,9 +26,13 @@ export default function Login() {
   };
 
   return (
-    <div style={{ padding: 50 }}>
-      <h1>Welcome Subash 👋</h1>
-      <button onClick={handleLogin}>Login with Google</button>
+    <div className="login-container">
+      <h1 className="login-title">Welcome !</h1>
+      <p className="login-tagline">Just Login and Feel the Fig</p>
+
+      <button className="login-btn" onClick={handleLogin}>
+        Login with Google
+      </button>
     </div>
   );
 }

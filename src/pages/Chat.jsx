@@ -4,12 +4,39 @@ import { auth } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { generateTodayTask } from "../utils/generateTask"; // adjust path if needed
+import { generateTodayTask } from "../utils/generateTask";
 import "../styles/chat.css";
+
+
+// ----------------------
+// RANDOM QUESTIONS OUTSIDE COMPONENT (NO WARNINGS)
+// ----------------------
+const randomQuestions = [
+  "Hello da, suddenly silent… you okay?",
+  "If you vanish now, should I come searching? 😭🔥",
+  "Quick question: what’s one thing stressing you today?",
+  "Oii… why do I feel like you’re thinking deeply?",
+  "If I ask a personal question… will you run? 😭",
+  "Tell me one happy memory suddenly.",
+  "If life gave you one wish now, what would you choose?",
+  "Why does your silence feel suspicious? 😂",
+  "Who is in your mind right now… tell honestly 👀",
+  "If you could restart today, what would you change?"
+];
+
+
+// Clean markdown symbols from output
+function cleanText(text) {
+  return text.replace(/\*/g, ""); 
+}
+
+
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [username, setUsername] = useState("");
+const [isTyping, setIsTyping] = useState(false);
 
   const [task, setTask] = useState("");
   const [streak, setStreak] = useState(0);
@@ -23,22 +50,46 @@ export default function Chat() {
   const BOT_IMG = "/aibot.png";
   const USER_IMG = "/user1.png";
 
-  function cleanText(text) {
-    return text.replace(/\*\*/g, "").replace(/\*/g, "");
-  }
 
+
+  // ----------------------------
+  // AUTO ASK RANDOM QUESTION IF USER IS SILENT
+  // ----------------------------
+  useEffect(() => {
+    if (!messages.length) return;
+
+    const timer = setTimeout(() => {
+      const q = randomQuestions[Math.floor(Math.random() * randomQuestions.length)];
+      setMessages((prev) => [...prev, { sender: "bot", text: q, avatar: BOT_IMG }]);
+    }, 17000);
+
+    return () => clearTimeout(timer);
+  }, [messages]);
+
+
+
+  // Scroll to bottom when messages update
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Subscribe to auth state and then load/generate today's task
+
+
+  // ----------------------------
+  // AUTH LISTENER → LOAD USER + TASK
+  // ----------------------------
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
+
       if (u) {
+        const emailName = u.email ? u.email.split("@")[0] : "User";
+        const formattedName =
+        emailName.charAt(0).toUpperCase() + emailName.slice(1);
+        setUsername(formattedName);
         loadOrCreateTodayTask(u.uid);
+
       } else {
-        // not signed in — clear UI
         setTask("");
         setCompleted(null);
         setStreak(0);
@@ -47,9 +98,13 @@ export default function Chat() {
     });
 
     return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+
+  // ----------------------------
+  // LOAD OR GENERATE TODAY'S TASK
+  // ----------------------------
   async function loadOrCreateTodayTask(uid) {
     try {
       const today = new Date().toISOString().split("T")[0];
@@ -64,12 +119,11 @@ export default function Chat() {
         setMessages([
           {
             sender: "bot",
-            text: `🔥 Hey Subash! Today’s task:\n👉 ${data.task}`,
+            text: `🔥 Hey ${username}! Today’s task:<br><b>${data.task}</b>`,
             avatar: BOT_IMG,
           },
         ]);
       } else {
-        // No task for today — generate one, write to DB inside generateTodayTask
         const generated = await generateTodayTask(uid);
         setTask(generated);
         setCompleted(false);
@@ -77,21 +131,25 @@ export default function Chat() {
         setMessages([
           {
             sender: "bot",
-            text: `🔥 Hey Subash! Today’s task:\n👉 ${generated}`,
+            text: `🔥 Hey ${username}! Today’s task:<br><b>${generated}</b>`,
             avatar: BOT_IMG,
           },
         ]);
       }
 
-      // load streak (optional)
       const streakRef = doc(db, "users", uid, "streak", "data");
       const sSnap = await getDoc(streakRef);
       if (sSnap.exists()) setStreak(sSnap.data().currentStreak || 0);
     } catch (err) {
-      console.error("Error loading/creating today's task:", err);
+      console.error("Error loading today's task:", err);
     }
   }
 
+
+
+  // ----------------------------
+  // CELEBRATION
+  // ----------------------------
   function launchCelebration() {
     for (let i = 0; i < 20; i++) {
       const piece = document.createElement("div");
@@ -111,6 +169,11 @@ export default function Chat() {
     setTimeout(() => emoji.remove(), 1500);
   }
 
+
+
+  // ----------------------------
+  // SAD EFFECT
+  // ----------------------------
   function launchSadEffect() {
     const container = chatContainerRef.current;
     if (!container) return;
@@ -129,84 +192,107 @@ export default function Chat() {
     }
   }
 
+
+
+  // ----------------------------
+  // SEND MESSAGE
+  // ----------------------------
   async function sendMessage() {
     if (!input.trim()) return;
 
     const textToSend = input;
     setInput("");
 
-    const userMsg = {
-      sender: "you",
-      text: textToSend,
-      avatar: USER_IMG,
-      read: true,
-    };
+    setMessages((prev) => [
+      ...prev,
+      { sender: "you", text: textToSend, avatar: USER_IMG, read: true },
+    ]);
 
-    setMessages((prev) => [...prev, userMsg]);
+   const personality = `
+You are FiG — ${username}'s chaotic-funny-emotional AI soulmate friend.
 
-    const personality = `
-You are Subash's friendly AI buddy.
-Tone: simple, casual, funny, supportive.
-No vulgar words. No long paragraphs.
+Rules for formatting:
+- NEVER use *, **, _, __, or any markdown formatting.
+- NEVER wrap text in **bold** or *italic*.
+- If you want bold, ONLY use <b>like this</b>.
+- If you accidentally generate asterisk symbols, remove them before replying.
 
-Always answer SHORT (max 2 lines).
+Your style:
+- short messages (max 2 lines)
+- funny, teasing, roasting, flirting, emotional, motivating
+- Tamil+English mix ok
 
-You remember:
-- Today’s task: ${task}
-- Completed today: ${completed}
+Memory:
+- Today's task: ${task}
+- Completed: ${completed}
 - Streak: ${streak}
 
-If user asks about task → clearly reply with today's task.
-If user shows success → encourage (short).
-If user shows sadness → respond gently.
-User: ${textToSend}
-  `;
+If convo is boring or user is silent → ask a random emotional/funny/flirty question.
+
+User: "${textToSend}"
+`;
 
     try {
-      const result = await model.generateContent(personality);
-      const reply = cleanText(result.response.text() || "");
+  // Start typing indicator
+  setIsTyping(true);
 
-      const botMsg = {
-        sender: "bot",
-        text: reply,
-        avatar: BOT_IMG,
-      };
+  const result = await model.generateContent(personality);
+  const reply = cleanText(result.response.text() || "");
 
-      setMessages((prev) => [...prev, botMsg]);
-    } catch (err) {
-      console.error("AI error:", err);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "Oops, something went wrong. Try again.", avatar: BOT_IMG },
-      ]);
-    }
+  // Stop typing indicator
+  setIsTyping(false);
 
-    if (/done|completed|finished/i.test(textToSend)) {
-      launchCelebration();
-    }
-    if (/sad|not done|failed|cant/i.test(textToSend)) {
-      launchSadEffect();
-    }
+  setMessages((prev) => [
+    ...prev,
+    { sender: "bot", text: reply, avatar: BOT_IMG },
+  ]);
+
+} catch (err) {
+  console.error("AI error:", err);
+
+  // Stop typing indicator even on error
+  setIsTyping(false);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      sender: "bot",
+      text: "Oops da… something broke. Try again 😭",
+      avatar: BOT_IMG,
+    },
+  ]);
+}
+
+
+    if (/done|completed|finished/i.test(textToSend)) launchCelebration();
+    if (/sad|not done|failed|cant/i.test(textToSend)) launchSadEffect();
   }
 
+
+
+  // ----------------------------
+  // UI
+  // ----------------------------
   return (
     <div className="chat-wrapper">
-      <div className="chat-container" ref={chatContainerRef} role="region" aria-label="Chat container">
+      <div
+        className="chat-container"
+        ref={chatContainerRef}
+        role="region"
+        aria-label="Chat container"
+      >
         <div className="chat-header">
           <h2>FiG</h2>
           <p>just us U & Me</p>
         </div>
 
-        <div
-          className="chat-body"
-          role="log"
-          aria-live="polite"
-          aria-relevant="additions"
-        >
+        <div className="chat-body" role="log" aria-live="polite">
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`msg-row ${msg.sender === "you" ? "msg-you" : "msg-bot"}`}
+              className={`msg-row ${
+                msg.sender === "you" ? "msg-you" : "msg-bot"
+              }`}
             >
               <img
                 className="avatar"
@@ -217,12 +303,31 @@ User: ${textToSend}
                 height="42"
               />
 
-              <div className={`bubble ${msg.sender}`}>
-                {msg.text}
-                {msg.sender === "you" && <span className="tick" aria-hidden>✔✔</span>}
-              </div>
+              {/* RENDER HTML LIKE <b> AS BOLD */}
+              <div
+                className={`bubble ${msg.sender}`}
+                dangerouslySetInnerHTML={{ __html: msg.text }}
+              ></div>
+
+              {msg.sender === "you" && (
+                <span className="tick" aria-hidden>
+                  ✔✔
+                </span>
+              )}
             </div>
           ))}
+          {/* TYPING INDICATOR */}
+{isTyping && (
+  <div className="typing-row">
+    <img className="avatar" src={BOT_IMG} width="42" height="42" />
+
+    <div className="typing-bubble">
+      <div className="typing-dot"></div>
+      <div className="typing-dot"></div>
+      <div className="typing-dot"></div>
+    </div>
+  </div>
+)}
 
           <div ref={bottomRef} />
         </div>
@@ -233,22 +338,11 @@ User: ${textToSend}
             placeholder="Talk to your FiG Buddy…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                sendMessage();
-              }
-            }}
-            aria-label="Type your message"
-            inputMode="text"
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             autoComplete="off"
           />
 
-          <button
-            className="send-btn"
-            onClick={sendMessage}
-            aria-label="Send message"
-            title="Send"
-          >
+          <button className="send-btn" onClick={sendMessage}>
             ➤
           </button>
         </div>

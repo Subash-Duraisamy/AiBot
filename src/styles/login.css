@@ -1,0 +1,80 @@
+/* MAIN CONTAINER */
+.login-container {
+  width: 100%;
+  min-height: 100vh;              /* Better than fixed 100vh for mobile */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+
+  /* Gradient that scales across all screens */
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  background-size: cover;
+
+  color: white;
+  text-align: center;
+
+  font-family: "Poppins", system-ui, sans-serif;
+
+  box-sizing: border-box;
+}
+
+/* TITLE */
+.login-title {
+  font-size: clamp(26px, 5vw, 42px);  /* Responsive font */
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+/* TAGLINE */
+.login-tagline {
+  font-size: clamp(14px, 3vw, 18px); /* Adapts to small screens */
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+/* BUTTON */
+.login-btn {
+  background: white;
+  color: #2575fc;
+  border: none;
+
+  padding: 14px 30px;
+
+  font-size: clamp(14px, 2.5vw, 18px); /* Adaptive size */
+  font-weight: 600;
+
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s ease;
+
+  box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+}
+
+/* HOVER EFFECT */
+.login-btn:hover {
+  transform: translateY(-3px);
+  background: #f2f2f2;
+}
+
+/* RESPONSIVE MOBILE FIXES */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+  }
+
+  .login-btn {
+    width: 80%;        /* Better for mobiles */
+    padding: 14px 0;
+  }
+}
+
+/* SAFE-AREA FIX FOR IPHONES */
+@supports (-webkit-touch-callout: none) {
+  .login-container {
+    min-height: -webkit-fill-available;
+  }
+}
