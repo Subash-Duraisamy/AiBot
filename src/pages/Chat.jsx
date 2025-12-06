@@ -161,12 +161,16 @@ export default function Chat() {
   // Google OAuth
   function googleLogin() {
     try {
+          console.log("CLIENT ID FROM ENV:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
       const client = google.accounts.oauth2.initTokenClient({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
         scope: "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
+
         callback: (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) setTokenAndFetch(tokenResponse.access_token);
         }
+       
+
       });
       client.requestAccessToken();
     } catch (e) {
