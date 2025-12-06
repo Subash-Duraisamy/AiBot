@@ -61,7 +61,7 @@ const [isTyping, setIsTyping] = useState(false);
     const timer = setTimeout(() => {
       const q = randomQuestions[Math.floor(Math.random() * randomQuestions.length)];
       setMessages((prev) => [...prev, { sender: "bot", text: q, avatar: BOT_IMG }]);
-    }, 17000);
+    }, 1700000);
 
     return () => clearTimeout(timer);
   }, [messages]);
